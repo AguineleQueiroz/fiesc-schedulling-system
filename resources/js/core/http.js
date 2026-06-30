@@ -25,7 +25,7 @@ async function request(method, url, data = null, params = {}) {
 
     const payload = await response.json().catch(() => ({message: 'Erro inesperado.'}));
 
-    if (!response.ok) {
+    if (!response.ok || response.redirected) {
         const err = new Error(payload.message || 'Requisição falhou.');
         err.status = response.status;
         err.errors = payload.errors ?? {};
