@@ -268,8 +268,45 @@ O laravel foi escolhido devido a limitação de tempo para implementação do te
 ./vendor/bin/sail artisan test
 ```
 
-A suite cobre os fluxos de autenticação (login com credenciais válidas e inválidas, logout) e troca de senha. Para rodar em modo verboso:
+A suite cobre autenticação, troca de senha, CRUD de usuários com restrições de perfil, gestão de disponibilidade, agendamentos com restrição por atendente e a lógica de cálculo de slots livres.
 
-```bash
-./vendor/bin/sail artisan test --verbose
-```
+---
+
+## Melhorias Futuras
+
+Dado o prazo de 24h, as decisões abaixo foram conscientemente deixadas fora do escopo da entrega. Documentadas aqui como próximos passos caso o projeto evoluísse além do desafio.
+
+### Segurança
+
+- Auditoria/log de ações administrativas sensíveis (exclusão de usuários, alteração de disponibilidade de terceiros), hoje sem rastreabilidade.
+- Política de senha mais rígida que o mínimo de 8 caracteres exigido pelo edital (ex.: exigir letra e número).
+- Autenticação de dois fatores (2FA) para o perfil administrador, dado seu nível de acesso ao sistema.
+
+### Arquitetura e qualidade de código
+
+- Centralizar regras de autorização mais complexas em Policies de forma mais consistente — hoje parte dessa lógica está no Service por pragmatismo de prazo.
+- Introduzir DTOs entre Controller e Service em vez de arrays, para tipagem mais forte nas fronteiras da aplicação.
+
+### Frontend e UX
+
+- Loading states e feedback visual mais refinado durante chamadas assíncronas (hoje há apenas tratamento de erro básico).
+- Paginação nas listagens de usuários e agendamentos, que hoje assumem baixo volume de dados.
+- Acessibilidade (ARIA labels, navegação por teclado em modais), não priorizada dado o prazo.
+- Validação client-side inline (ao perder foco do campo), além da validação atual no submit.
+
+### Regras de negócio simplificadas
+
+- Cliente do agendamento hoje é mock (nome/telefone livres); evoluiria para uma entidade `Client` própria, com histórico de agendamentos.
+- Notificação ao atendente na criação/cancelamento de agendamento, não implementada por ausência de mailer configurado.
+- Reagendamento (mover um agendamento existente para outro horário mantendo histórico) não foi tratado — atualmente só há criação e cancelamento.
+
+### Performance
+
+- Índices compostos explícitos nas colunas mais consultadas (`attendant_id + date` em `appointments`, `user_id + day_of_week` em `availabilities`), além dos índices automáticos de FK.
+- Cache da disponibilidade do atendente, consultada com frequência e de baixa volatilidade.
+
+### DevOps e observabilidade
+
+- Pipeline de CI (GitHub Actions) executando os testes automatizados a cada push.
+- Logging estruturado de erros de aplicação, além do log padrão do Laravel.
+- Variáveis de ambiente separadas para produção e Dockerfile multi-stage otimizado, já que o ambiente atual via Sail é voltado a desenvolvimento local.
