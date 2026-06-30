@@ -5,7 +5,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('users.index') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800"/>
+                        <img src="https://fiesc.com.br/sites/default/files/styles/large/public/2026-02/marca-fiesc-reduzida_cor.webp" alt="fiesc logomarca" width="64">
                     </a>
                 </div>
 
