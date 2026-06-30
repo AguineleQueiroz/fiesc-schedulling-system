@@ -10,6 +10,7 @@ function show(message, type = 'success') {
         : 'mb-4 p-4 rounded text-sm font-medium bg-red-100 text-red-800';
 
     box.classList.remove('hidden');
+    box.scrollIntoView({behavior: 'smooth', block: 'nearest'});
 
     if (type === 'success') {
         setTimeout(() => box.classList.add('hidden'), 4000);

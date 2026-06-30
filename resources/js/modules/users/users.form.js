@@ -28,8 +28,9 @@ if (form) {
             }
             window.location.href = redirect;
         } catch (err) {
-            if (err.status === 422 && Object.keys(err.errors).length > 0) {
+            if (err.status === 422 && Object.keys(err.errors ?? {}).length > 0) {
                 showErrors(form, err.errors);
+                notify.error('Verifique os campos destacados em vermelho.');
             } else {
                 notify.error(err.message || 'Ocorreu um erro. Tente novamente.');
             }
