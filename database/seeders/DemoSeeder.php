@@ -24,7 +24,9 @@ class DemoSeeder extends Seeder
             ]
         );
 
-        // Disponibilidade: seg–sex, 08:00–12:00 e 13:00–17:00
+        /**
+         * Disponibilidade: seg–sex, 08:00–12:00 e 13:00–17:00
+         */
         $windows = [
             ['start' => '08:00', 'end' => '12:00'],
             ['start' => '13:00', 'end' => '17:00'],
@@ -44,7 +46,9 @@ class DemoSeeder extends Seeder
             }
         }
 
-        // Agendamentos: semana corrente (seg–sex)
+        /**
+         * Agendamentos: semana corrente (seg–sex)
+         */
         $monday = Carbon::now()->startOfWeek(Carbon::MONDAY);
 
         $appointments = [
