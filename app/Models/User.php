@@ -16,7 +16,7 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'role'];
 
-    public function isAtendente(): bool
+    public function isAttendant(): bool
     {
         return $this->role === UserRole::Attendant;
     }
