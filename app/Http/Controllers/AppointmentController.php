@@ -26,9 +26,12 @@ class AppointmentController extends Controller
 
     public function create(): View
     {
-        return view('appointments.create', [
-            'attendants' => $this->userService->attendants(),
-        ]);
+        $user = auth()->user();
+        $attendants = $user->isAttendant()
+            ? collect([$user])
+            : $this->userService->attendants();
+
+        return view('appointments.create', ['attendants' => $attendants]);
     }
 
     public function availableSlots(Request $request): JsonResponse

@@ -8,7 +8,11 @@ class StoreAppointmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+        if ($user->isAttendant()) {
+            return (int) $this->input('attendant_id') === $user->id;
+        }
+        return true;
     }
 
     public function rules(): array
