@@ -25,27 +25,31 @@ cp .env.example .env
 # http://localhost
 ```
 
-### Credenciais do administrador padrão
+### Credenciais padrão
 
 | Campo | Valor |
 |-------|-------|
 | E-mail | `admin@fiesc.local` |
 | Senha | `admin1234` |
 
-> O usuário é criado pelo `AdminUserSeeder`. Para recriar do zero: `./vendor/bin/sail artisan migrate:fresh --seed`
+| Campo | Valor                   |
+|-------|-------------------------|
+| E-mail | `atendente@fiesc.local` |
+| Senha | `atendente1234`             |
 
+> O usuários, agendamentos e disponibilidades criados pelo seeder. Para recriar do zero: `./vendor/bin/sail artisan migrate:fresh --seed`
 ---
 
 ## Stack utilizada
 
-| Camada | Tecnologia | Justificativa |
-|--------|-----------|---------------|
-| Backend | Laravel 12 / PHP 8.3 | Framework maduro, scaffolding de autenticação pronto via Breeze, ampla adoção no mercado |
-| Banco de dados | MySQL 8 | Suficiente para o escopo; PostgreSQL seria over-engineering neste caso |
-| Frontend | Blade + JavaScript vanilla modular | O escopo não justifica Vue/React; usar JS puro demonstra diretamente os "conhecimentos sólidos de JS" exigidos pelo edital (RQNF1) |
+| Camada | Tecnologia | Justificativa                                                                                                       |
+|--------|-----------|---------------------------------------------------------------------------------------------------------------------|
+| Backend | Laravel 12 / PHP 8.3 | Framework maduro, scaffolding de autenticação pronto via Breeze, ampla adoção no mercado                            |
+| Banco de dados | MySQL 8 | Suficiente para o escopo;                                                                                           |
+| Frontend | Blade + JavaScript vanilla modular | Usar JS puro corresponde diretamente a exigencia de "conhecimentos sólidos de JS" exigidos pelo PDF (RQNF1)         |
 | Autenticação | Laravel Breeze (stack Blade + Alpine) | Scaffolding pronto de login/logout; Alpine.js é utilizado apenas onde o Breeze já o emprega (ex.: dropdown de menu) |
-| Containerização | Docker via Laravel Sail | Garante que o avaliador sobe o projeto com poucos comandos, sem precisar configurar PHP/MySQL localmente |
-| Build de assets | Vite | Padrão do Laravel 12; múltiplos entry points declarados, um por página com interação JS |
+| Containerização | Docker via Laravel Sail | Para o avaliador(a) subir o projeto com poucos comandos, sem precisar configurar PHP/MySQL localmente               |
+| Build de assets | Vite | Padrão do Laravel 12; múltiplos entry points declarados, um por página com interação JS                             |
 
 ### Configuração simplificada de drivers
 
@@ -61,7 +65,7 @@ cp .env.example .env
 app/
 ├── Enums/
 │   ├── UserRole.php            # admin | attendant
-│   └── AppointmentStatus.php  # scheduled | cancelled
+│   └── AppointmentStatus.php   # scheduled | cancelled
 ├── Models/
 │   ├── User.php                # helpers: isAdmin(), isAttendant(), canEdit()
 │   ├── Availability.php
@@ -88,22 +92,20 @@ app/
     └── AppointmentRepository.php # queries complexas/reutilizáveis de agendamentos
 ```
 
-**Padrões aplicados:** FormRequest (validação e autorização de entrada), Service (regras de negócio), Policy (autorização de recursos), Repository (aplicado pontualmente apenas onde a query é não trivial — cálculo de horários livres e filtragem de agendamentos por perfil).
+**Padrões aplicados:** FormRequest (validação e autorização de entrada), Service (regras de negócio), Policy (autorização de recursos), Repository/Query Object (aplicado pontualmente apenas onde a query não é trivial — cálculo de horários livres e filtragem de agendamentos por perfil).
 
 #### Padrão de camadas — decisão arquitetural
 
 A divisão de responsabilidades segue uma hierarquia estrita:
 
-```
-Controller  →  Service  →  Eloquent (direto)
-                       →  Repository  (apenas queries complexas/reutilizáveis)
-```
+>Controller  →  Service  →  Eloquent (direto) ou Repository  (apenas queries complexas/reutilizáveis)
 
-**Controller:** exclusivamente coordenação HTTP — recebe request, delega ao Service, retorna response. Nunca toca Eloquent diretamente.
+
+**Controller:** exclusivamente coordenação HTTP — recebe request, delega ao Service, retorna response. Não toca Eloquent diretamente.
 
 **Service:** contém a regra de negócio e pode usar Eloquent diretamente para operações simples (create, update, delete de um único modelo). Também injeta o Repository quando a query é complexa ou precisa ser reutilizada em mais de um lugar.
 
-**Repository (Query Object):** encapsula apenas as queries que têm complexidade real — filtragem condicional por perfil, joins implícitos via relacionamentos, ou queries chamadas de mais de um Service. Não existe interface de Repository: a simplificação é intencional dado o escopo do projeto. Criar interfaces abstratas sem múltiplas implementações concretas seria over-engineering para uma aplicação de processo seletivo.
+>Repository (Query Object): ** encapsula apenas as queries que têm complexidade real — filtragem condicional por perfil, joins implícitos via relacionamentos, ou queries chamadas de mais de um Service. Não existe interface de Repository: a simplificação é intencional dado o escopo do projeto. Criar interfaces abstratas sem múltiplas implementações concretas seria over-engineering para uma aplicação de processo seletivo.
 
 **Mapeamento Service → agregado de domínio:**
 
@@ -112,14 +114,6 @@ Controller  →  Service  →  Eloquent (direto)
 | `UserService` | `User` | CRUD + regra de role |
 | `AvailabilityService` | `Availability` | CRUD + validação de overlap |
 | `AppointmentService` | `Appointment` | Cálculo de slots livres, criação, cancelamento |
-
-`Schedule` não é um agregado — não existe tabela `schedules`. O conceito de "agenda" é apenas o nome que a UI dá à junção visual de `Availability` e `Appointment`. Por isso não existe `ScheduleService`: o cálculo de slots livres pertence ao `AppointmentService`, que lê `Availability` diretamente (cross-model read, sem injetar `AvailabilityService` — evita acoplamento entre services), e delega ao Repository apenas a query de agendamentos já existentes.
-
-Exemplos concretos desta divisão:
-- `AppointmentRepository::listForUser()` — filtra por role (admin vê todos, atendente vê só os seus) → Repository justificado pela regra condicional + reutilização.
-- `AppointmentRepository::scheduledForAttendantOnDate()` — usada por `AppointmentService::availableSlots()` para calcular slots livres; query com critério de data e atendente → Repository justificado pela especificidade.
-- `AvailabilityService::hasOverlap()` — query Eloquent inline no Service, pois é a própria regra de negócio (validação de sobreposição); não há reutilização em outro Service.
-- `AppointmentService::create()` / `cancel()` — Eloquent direto no Service; operações triviais que não justificam Repository.
 
 ### Frontend
 
@@ -170,9 +164,9 @@ Todos os endpoints retornam HTTP status codes coerentes em cenários de sucesso 
 
 ---
 
-## Decisões sobre pontos não especificados no edital
+## Decisões sobre pontos não especificados no PDF
 
-Os itens abaixo não estavam detalhados nos requisitos. A interpretação adotada em cada caso está documentada aqui para transparência — e deve ser considerada parte da avaliação de **Análise e Síntese** e **Planejamento e Organização**.
+Os itens abaixo não estavam detalhados nos requisitos. A interpretação adotada em cada caso está documentada aqui para transparência.
 
 ### 1. Contradição aparente no RQF1.1 — "lista igual para todos" vs. "atendente vê apenas listagem"
 
@@ -180,7 +174,7 @@ Os itens abaixo não estavam detalhados nos requisitos. A interpretação adotad
 
 ### 2. Risco de escalonamento de privilégio na edição do próprio perfil
 
-O edital permite que o atendente edite o próprio usuário, mas não especifica se o campo "Tipo de Usuário" é editável neste contexto. Permitir que o atendente altere o próprio role para `admin` seria uma falha grave de segurança.
+O PDF permite que o atendente edite o próprio usuário, mas não especifica se o campo "Tipo de Usuário" é editável neste contexto. Permitir que o atendente altere o próprio role para `admin` seria uma falha grave de segurança.
 
 **Decisão:** a edição do campo `role` é bloqueada sempre que o usuário autenticado está editando a si mesmo, independentemente do seu perfil. Apenas um admin pode alterar o role de *outro* usuário. Isso é tratado em `UserService::update()` e reforçado na view `users/edit.blade.php`, que oculta o campo `role` quando o usuário edita a si mesmo.
 
@@ -188,7 +182,7 @@ O edital permite que o atendente edite o próprio usuário, mas não especifica 
 
 O requisito 1.3 (Edição de Usuários) especifica que a tela de edição deve reaproveitar os mesmos campos da tela de inserção (1.2), exceto e-mail e senha. Essa exclusão foi interpretada como delimitada ao escopo do formulário de edição de dados cadastrais — não como uma restrição de que a senha seja imutável no sistema como um todo.
 
-Essa distinção é necessária porque o edital não descreve nenhum outro mecanismo de alteração de senha (como recuperação por e-mail), e a aplicação não possui um serviço de envio de e-mail configurado. Sem um fluxo alternativo, o usuário ficaria permanentemente preso à senha definida em sua criação, o que comprometeria a usabilidade do sistema — um dos critérios de avaliação explicitamente listados no edital.
+Essa distinção é necessária porque o PDF não descreve nenhum outro mecanismo de alteração de senha (como recuperação por e-mail), e a aplicação não possui um serviço de envio de e-mail configurado. Sem um fluxo alternativo, o usuário ficaria permanentemente preso à senha definida em sua criação, o que comprometeria a usabilidade do sistema — um dos critérios de avaliação explicitamente listados no PDF.
 
 **Decisão:** foi implementada uma tela de autoatendimento ("Alterar Senha"), isolada do CRUD de usuários, onde o usuário logado pode alterar exclusivamente a própria senha mediante confirmação da senha atual. Essa tela:
 
@@ -196,35 +190,35 @@ Essa distinção é necessária porque o edital não descreve nenhum outro mecan
 - não permite que um administrador altere a senha de terceiros;
 - não expõe nenhum campo de senha no formulário de edição de usuário (1.3), que permanece restrito a Nome e Tipo de Usuário, conforme a leitura literal do requisito.
 
-Essa separação de responsabilidades — edição de dados cadastrais (RQF1) versus segurança da própria conta (funcionalidade complementar) — foi a forma encontrada de atender tanto à regra explícita do edital quanto à exigência implícita de usabilidade, dado que nenhum requisito determina que a senha deva permanecer imutável após a criação do usuário.
+Essa separação de responsabilidades — edição de dados cadastrais (RQF1) versus segurança da própria conta (funcionalidade complementar) — foi a forma encontrada de atender tanto à regra explícita do PDF quanto à exigência implícita de usabilidade, dado que nenhum requisito determina que a senha deva permanecer imutável após a criação do usuário.
 
 ### 4. Granularidade dos slots de agendamento
 
-O edital não define de quanto em quanto tempo os horários devem ser oferecidos na consulta de disponibilidade.
+O PDF não define de quanto em quanto tempo os horários devem ser oferecidos na consulta de disponibilidade.
 
-**Decisão:** 30 minutos, configurável em `config/scheduling.php` (`slot_duration_minutes`). Alterar o valor nesse arquivo impacta automaticamente o cálculo de todos os slots gerados pelo `ScheduleService`.
+**Decisão:** 30 minutos, configurável em `config/scheduling.php` (`slot_duration_minutes`). Alterar o valor nesse arquivo impacta automaticamente o cálculo de todos os slots gerados pelo `AppointmentService`.
 
 ### 5. Tela de criação efetiva do agendamento
 
 O RQF2 detalha o cadastro de disponibilidade e a consulta de horários livres, mas não a tela onde o agendamento é de fato criado.
 
-**Decisão:** foi implementado o fluxo completo em `/schedule/create`: seleção de atendente → seleção de data → carregamento dinâmico (via AJAX) dos slots livres para aquele atendente naquele dia → preenchimento de dados do cliente (nome e telefone, como mock) → confirmação. O slot escolhido é imediatamente bloqueado para novas consultas.
+**Decisão:** foi implementado o fluxo completo em `/appointments/create`: seleção de atendente → seleção de data → carregamento dinâmico (via AJAX) dos slots livres para aquele atendente naquele dia → preenchimento de dados do cliente (nome e telefone, como mock) → confirmação. O slot escolhido é imediatamente bloqueado para novas consultas.
 
 ### 6. Cancelamento de agendamento
 
 A introdução do documento menciona cancelamento, mas os RQFs não o detalham.
 
-**Decisão:** a listagem de agendamentos (`/schedule`) exibe um botão "Cancelar" para cada agendamento com status `scheduled`. A ação chama `DELETE /appointments/{id}` via AJAX, muda o status para `cancelled` no banco e atualiza a linha na tabela sem recarregar a página. O horário fica disponível novamente para novos agendamentos.
+**Decisão:** a listagem de agendamentos (`/appointments`) exibe um botão "Cancelar" para cada agendamento com status `scheduled`. A ação chama `DELETE /appointments/{id}` via AJAX, muda o status para `cancelled` no banco e atualiza a linha na tabela sem recarregar a página. O horário fica disponível novamente para novos agendamentos.
 
 ### 7. Sobreposição de janelas de disponibilidade
 
-O edital exige apenas "hora final > hora inicial", sem tratar janelas conflitantes do mesmo atendente no mesmo dia.
+O PDF exige apenas "hora final > hora inicial", sem tratar janelas conflitantes do mesmo atendente no mesmo dia.
 
 **Decisão:** o `AvailabilityService::hasOverlap()` valida, antes de criar ou editar qualquer janela, se o intervalo informado se sobrepõe a alguma janela já cadastrada para o mesmo atendente no mesmo dia. Em caso de conflito, retorna HTTP 422 com mensagem descritiva.
 
 ### 8. Garantia de existência de um usuário administrador
 
-O edital não especifica como o primeiro admin é criado, já que o cadastro público foi removido.
+O PDF não especifica como o primeiro admin é criado, já que o cadastro público foi removido.
 
 **Decisão:** o `AdminUserSeeder` cria o usuário `admin@fiesc.local` na primeira execução de `migrate --seed`. O seeder usa `firstOrCreate`, portanto é idempotente e seguro de rodar múltiplas vezes.
 
@@ -240,10 +234,15 @@ O requisito 2.3 (Consulta de Horários Disponíveis) descreve que, ao selecionar
 
 Essa lacuna foi tratada seguindo o mesmo princípio de fronteira de permissão já aplicado ao módulo de Usuários (RQF1), onde o perfil atendente tem acesso restrito aos próprios dados. A agenda de um atendente é considerada território exclusivo dele, e a regra adotada é:
 
-- **Atendente:** só pode consultar, criar e cancelar agendamentos na própria agenda. O campo de seleção de atendente não é exibido para esse perfil — o sistema assume automaticamente o usuário autenticado como o atendente do agendamento.
+- **Atendente:** só pode consultar, criar e cancelar agendamentos na própria agenda. O campo de seleção de atendente exibe somente o perfil logado e o sistema assume automaticamente o usuário autenticado como o atendente do agendamento também.
 - **Administrador:** mantém acesso total, podendo selecionar qualquer atendente, consultar qualquer agenda e criar ou cancelar agendamentos em nome de terceiros — coerente com seu papel de supervisão geral já presente em outras partes do sistema (gestão de usuários e disponibilidade de qualquer atendente), simulando, por exemplo, um cenário de recepção administrativa centralizando atendimentos.
 
 Essa validação não depende apenas da omissão do campo na interface: a regra é também aplicada no backend via `StoreAppointmentRequest::authorize()`, garantindo que, independentemente do que for enviado na requisição, o sistema rejeita com HTTP 403 qualquer tentativa de vincular um agendamento a outro atendente quando o solicitante não é administrador. Essa decisão previne tanto erro operacional quanto uso indevido por manipulação direta da requisição.
+
+
+### 11. Opção pelo framework Laravel
+
+O laravel foi escolhido devido a limitação de tempo para implementação do teste. Uma vez que é uma ferramenta simples, madura no mercado e entrega velocidade de desenvolvimento, optou-se pela sua adoção para este cenário.
 
 ---
 
