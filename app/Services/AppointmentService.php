@@ -10,7 +10,7 @@ use App\Repositories\AppointmentRepository;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
-readonly class AppointmentService
+class AppointmentService
 {
     public function __construct(private AppointmentRepository $repository) {}
 
