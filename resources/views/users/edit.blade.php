@@ -25,7 +25,7 @@
                                 class="text-red-500">*</span></label>
                         <input type="text" id="name" name="name"
                                value="{{ $user->name }}"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                required autofocus/>
                         <p class="mt-1 text-sm text-red-600 hidden" data-error-for="name"></p>
                     </div>
@@ -36,7 +36,7 @@
                             <label for="role" class="block text-sm font-medium text-gray-700">Tipo de Usuário <span
                                     class="text-red-500">*</span></label>
                             <select id="role" name="role"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                     required>
                                 <option value="admin" @selected($user->role->value === 'admin')>Administrador</option>
                                 <option value="atendente" @selected($user->role->value === 'atendente')>Atendente
@@ -49,7 +49,7 @@
                     <div class="flex items-center justify-between mt-6">
                         <a href="{{ route('users.index') }}" class="text-sm text-gray-600 hover:underline">Cancelar</a>
                         <button type="submit"
-                                class="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                                class="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                             Salvar
                         </button>
                     </div>

@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Usuários</h2>
             @can('create', App\Models\User::class)
                 <a href="{{ route('users.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                     + Novo Usuário
                 </a>
             @endcan
@@ -39,7 +39,7 @@
                             <td class="px-6 py-4 text-right space-x-2">
                                 @can('update', $user)
                                     <a href="{{ route('users.edit', $user) }}"
-                                       class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Editar</a>
+                                       class="text-blue-600 hover:text-blue-900 text-sm font-medium">Editar</a>
                                 @endcan
                                 @can('delete', $user)
                                     <button

@@ -29,7 +29,7 @@ function renderRow(av) {
             <button data-action="edit-av" data-id="${av.id}"
                     data-day="${av.day_of_week}" data-start="${av.start_time.substring(0, 5)}"
                     data-end="${av.end_time.substring(0, 5)}" data-active="${av.active ? '1' : '0'}"
-                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Editar</button>
+                    class="text-blue-600 hover:text-blue-900 text-sm font-medium">Editar</button>
             <button data-action="delete-av" data-id="${av.id}"
                     class="text-red-600 hover:text-red-900 text-sm font-medium">Excluir</button>
         </td>`;

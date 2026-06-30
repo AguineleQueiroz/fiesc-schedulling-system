@@ -18,7 +18,7 @@
                     Selecione o atendente
                 </label>
                 <select id="attendant-select"
-                        class="block w-full sm:w-72 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        class="block w-full sm:w-72 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">-- selecione --</option>
                     @foreach($attendants as $att)
                         <option value="{{ $att->id }}">{{ $att->name }}</option>
@@ -31,7 +31,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-base font-semibold text-gray-800">Janelas cadastradas</h3>
                     <button id="btn-add-availability"
-                            class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                         + Adicionar
                     </button>
                 </div>
@@ -65,7 +65,7 @@
                             <label class="block text-sm font-medium text-gray-700">Dia da Semana <span
                                     class="text-red-500">*</span></label>
                             <select id="day_of_week" name="day_of_week"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                     required>
                                 <option value="">Selecione...</option>
                                 <option value="0">Domingo</option>
@@ -83,7 +83,7 @@
                             <label class="block text-sm font-medium text-gray-700">Ativo? <span
                                     class="text-red-500">*</span></label>
                             <select id="active" name="active"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                 <option value="1">Sim</option>
                                 <option value="0">Não</option>
                             </select>
@@ -93,7 +93,7 @@
                             <label class="block text-sm font-medium text-gray-700">Hora Inicial <span
                                     class="text-red-500">*</span></label>
                             <input type="time" id="start_time" name="start_time"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                    required/>
                             <p class="mt-1 text-sm text-red-600 hidden" data-error-for="start_time"></p>
                         </div>
@@ -102,7 +102,7 @@
                             <label class="block text-sm font-medium text-gray-700">Hora Final <span
                                     class="text-red-500">*</span></label>
                             <input type="time" id="end_time" name="end_time"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                    required/>
                             <p class="mt-1 text-sm text-red-600 hidden" data-error-for="end_time"></p>
                         </div>
@@ -114,7 +114,7 @@
                             Cancelar
                         </button>
                         <button type="submit"
-                                class="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                                class="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                             Salvar
                         </button>
                     </div>

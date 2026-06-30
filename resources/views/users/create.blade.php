@@ -24,7 +24,7 @@
                         <label for="name" class="block text-sm font-medium text-gray-700">Nome <span
                                 class="text-red-500">*</span></label>
                         <input type="text" id="name" name="name"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                required autofocus/>
                         <p class="mt-1 text-sm text-red-600 hidden" data-error-for="name"></p>
                     </div>
@@ -33,7 +33,7 @@
                         <label for="email" class="block text-sm font-medium text-gray-700">E-mail <span
                                 class="text-red-500">*</span></label>
                         <input type="email" id="email" name="email"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                required/>
                         <p class="mt-1 text-sm text-red-600 hidden" data-error-for="email"></p>
                     </div>
@@ -42,7 +42,7 @@
                         <label for="role" class="block text-sm font-medium text-gray-700">Tipo de Usuário <span
                                 class="text-red-500">*</span></label>
                         <select id="role" name="role"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 required>
                             <option value="">Selecione...</option>
                             <option value="admin">Administrador</option>
@@ -55,7 +55,7 @@
                         <label for="password" class="block text-sm font-medium text-gray-700">Senha <span
                                 class="text-red-500">*</span></label>
                         <input type="password" id="password" name="password"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                required minlength="8"/>
                         <p class="mt-1 text-sm text-red-600 hidden" data-error-for="password"></p>
                     </div>
@@ -64,7 +64,7 @@
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirme a
                             Senha <span class="text-red-500">*</span></label>
                         <input type="password" id="password_confirmation" name="password_confirmation"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                required/>
                         <p class="mt-1 text-sm text-red-600 hidden" data-error-for="password_confirmation"></p>
                     </div>
@@ -72,7 +72,7 @@
                     <div class="flex items-center justify-between">
                         <a href="{{ route('users.index') }}" class="text-sm text-gray-600 hover:underline">Cancelar</a>
                         <button type="submit"
-                                class="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                                class="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                             Criar Usuário
                         </button>
                     </div>
