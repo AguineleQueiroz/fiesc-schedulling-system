@@ -21,4 +21,13 @@ class UpdateUserRequest extends FormRequest
             'role' => ['sometimes', 'string', Rule::enum(UserRole::class)],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'O nome é obrigatório.',
+            'name.max'      => 'O nome não pode ter mais de 255 caracteres.',
+            'role.enum'     => 'O tipo de usuário selecionado é inválido.',
+        ];
+    }
 }
