@@ -15,21 +15,18 @@ class AppointmentRepository
             ->orderBy('date', 'desc')
             ->orderBy('start_time', 'desc');
 
-        if ($user->isAtendente()) {
+        if ($user->isAttendant()) {
             $query->where('attendant_id', $user->id);
         }
 
         return $query->get();
     }
 
-    public function create(array $data): Appointment
+    public function scheduledForAttendantOnDate(int $attendantId, string $date): Collection
     {
-        return Appointment::create(array_merge($data, ['status' => AppointmentStatus::Scheduled]));
-    }
-
-    public function cancel(Appointment $appointment): Appointment
-    {
-        $appointment->update(['status' => AppointmentStatus::Cancelled]);
-        return $appointment->fresh();
+        return Appointment::where('attendant_id', $attendantId)
+            ->where('date', $date)
+            ->where('status', AppointmentStatus::Scheduled)
+            ->get();
     }
 }

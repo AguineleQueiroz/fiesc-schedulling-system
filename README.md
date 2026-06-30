@@ -82,14 +82,36 @@ app/
 │       ├── UpdateAvailabilityRequest.php
 │       └── StoreAppointmentRequest.php
 ├── Services/
-│   ├── UserService.php           # criação e edição de usuários
-│   ├── AvailabilityService.php   # validação de sobreposição de janelas
+│   ├── UserService.php           # criação, edição, exclusão e listagem de usuários
+│   ├── AvailabilityService.php   # CRUD de disponibilidade + validação de sobreposição
+│   ├── AppointmentService.php    # criação e cancelamento de agendamentos
 │   └── ScheduleService.php       # cálculo de slots livres
 └── Repositories/
-    └── AppointmentRepository.php # única query não trivial: filtro por atendente + status
+    └── AppointmentRepository.php # queries complexas/reutilizáveis de agendamentos
 ```
 
 **Padrões aplicados:** FormRequest (validação e autorização de entrada), Service (regras de negócio), Policy (autorização de recursos), Repository (aplicado pontualmente apenas onde a query é não trivial — cálculo de horários livres e filtragem de agendamentos por perfil).
+
+#### Padrão de camadas — decisão arquitetural
+
+A divisão de responsabilidades segue uma hierarquia estrita:
+
+```
+Controller  →  Service  →  Eloquent (direto)
+                       →  Repository  (apenas queries complexas/reutilizáveis)
+```
+
+**Controller:** exclusivamente coordenação HTTP — recebe request, delega ao Service, retorna response. Nunca toca Eloquent diretamente.
+
+**Service:** contém a regra de negócio e pode usar Eloquent diretamente para operações simples (create, update, delete de um único modelo). Também injeta o Repository quando a query é complexa ou precisa ser reutilizada em mais de um lugar.
+
+**Repository (Query Object):** encapsula apenas as queries que têm complexidade real — filtragem condicional por perfil, joins implícitos via relacionamentos, ou queries chamadas de mais de um Service. Não existe interface de Repository: a simplificação é intencional dado o escopo do projeto. Criar interfaces abstratas sem múltiplas implementações concretas seria over-engineering para uma aplicação de processo seletivo.
+
+Exemplos concretos desta divisão:
+- `AppointmentRepository::listForUser()` — filtra por role (admin vê todos, atendente vê só os seus) → Repository justificado pela regra condicional + reutilização.
+- `AppointmentRepository::scheduledForAttendantOnDate()` — usada pelo `ScheduleService` para calcular slots livres; query com critério de data e atendente → Repository justificado pela especificidade.
+- `AvailabilityService::hasOverlap()` — query Eloquent inline no Service, pois é a própria regra de negócio (validação de sobreposição); não há reutilização em outro Service.
+- `AppointmentService::create()` / `cancel()` — Eloquent direto no Service; operações triviais que não justificam Repository.
 
 ### Frontend
 

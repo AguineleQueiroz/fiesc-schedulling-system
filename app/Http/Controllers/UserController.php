@@ -11,29 +11,13 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function __construct(private readonly UserService $service)
-    {
-    }
+    public function __construct(private readonly UserService $service) {}
 
     public function index(): View
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::orderBy('name')->get();
-
-        return view('users.index', compact('users'));
-    }
-
-    public function store(StoreUserRequest $request): JsonResponse
-    {
-        $user = $this->service->create($request->validated());
-
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-        ], 201);
+        return view('users.index', ['users' => $this->service->all()]);
     }
 
     public function create(): View
@@ -41,6 +25,18 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         return view('users.create');
+    }
+
+    public function store(StoreUserRequest $request): JsonResponse
+    {
+        $user = $this->service->create($request->validated());
+
+        return response()->json([
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+            'role'  => $user->role,
+        ], 201);
     }
 
     public function edit(User $user): View
@@ -55,7 +51,7 @@ class UserController extends Controller
         $updated = $this->service->update($user, $request->validated(), $request->user());
 
         return response()->json([
-            'id' => $updated->id,
+            'id'   => $updated->id,
             'name' => $updated->name,
             'role' => $updated->role,
         ]);
@@ -65,7 +61,7 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
-        $user->delete();
+        $this->service->delete($user);
 
         return response()->json(null, 204);
     }
