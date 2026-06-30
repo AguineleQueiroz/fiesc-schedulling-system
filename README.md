@@ -234,6 +234,17 @@ O scaffolding do Laravel Breeze inclui por padrão: registro público, recupera�
 
 **Decisão:** esses fluxos foram completamente removidos — controllers, views, rotas e testes associados. Foram mantidos apenas: login, logout e troca de senha autenticada (`PUT /password`).
 
+### 10. Restrição de criação de agendamento por atendente
+
+O requisito 2.3 (Consulta de Horários Disponíveis) descreve que, ao selecionar um atendente e uma data, o sistema deve listar os horários livres para agendamento — mas não especifica explicitamente quem está autorizado a efetivamente criar um agendamento em nome de qual atendente. Sem essa definição, um formulário de cadastro aberto permitiria que qualquer usuário com perfil atendente selecionasse a agenda de um colega e criasse ou manipulasse compromissos que não lhe pertencem.
+
+Essa lacuna foi tratada seguindo o mesmo princípio de fronteira de permissão já aplicado ao módulo de Usuários (RQF1), onde o perfil atendente tem acesso restrito aos próprios dados. A agenda de um atendente é considerada território exclusivo dele, e a regra adotada é:
+
+- **Atendente:** só pode consultar, criar e cancelar agendamentos na própria agenda. O campo de seleção de atendente não é exibido para esse perfil — o sistema assume automaticamente o usuário autenticado como o atendente do agendamento.
+- **Administrador:** mantém acesso total, podendo selecionar qualquer atendente, consultar qualquer agenda e criar ou cancelar agendamentos em nome de terceiros — coerente com seu papel de supervisão geral já presente em outras partes do sistema (gestão de usuários e disponibilidade de qualquer atendente), simulando, por exemplo, um cenário de recepção administrativa centralizando atendimentos.
+
+Essa validação não depende apenas da omissão do campo na interface: a regra é também aplicada no backend via `StoreAppointmentRequest::authorize()`, garantindo que, independentemente do que for enviado na requisição, o sistema rejeita com HTTP 403 qualquer tentativa de vincular um agendamento a outro atendente quando o solicitante não é administrador. Essa decisão previne tanto erro operacional quanto uso indevido por manipulação direta da requisição.
+
 ---
 
 ## Regras de negócio por perfil
