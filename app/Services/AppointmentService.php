@@ -52,9 +52,9 @@ readonly class AppointmentService
             while ($current->copy()->addMinutes($slotMinutes)->lte($windowEnd)) {
                 $slotEnd = $current->copy()->addMinutes($slotMinutes);
 
-                $occupied = $existingAppointments->contains(function ($appt) use ($current, $slotEnd) {
-                    $apptStart = Carbon::parse($appt->start_time);
-                    $apptEnd   = Carbon::parse($appt->end_time);
+                $occupied = $existingAppointments->contains(function ($appt) use ($current, $slotEnd, $date) {
+                    $apptStart = Carbon::parse($date . ' ' . $appt->start_time);
+                    $apptEnd   = Carbon::parse($date . ' ' . $appt->end_time);
 
                     return $current->lt($apptEnd) && $slotEnd->gt($apptStart);
                 });
