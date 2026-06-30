@@ -16,7 +16,7 @@
                     </x-nav-link>
 
                     <x-nav-link :href="route('appointments.index')"
-                                :active="request()->routeIs('appointments.*', 'schedule.*')">
+                                :active="request()->routeIs('appointments.*')">
                         Agendamentos
                     </x-nav-link>
 
@@ -86,7 +86,7 @@
                 Usuários
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('appointments.index')"
-                                   :active="request()->routeIs('appointments.*', 'schedule.*')">
+                                   :active="request()->routeIs('appointments.*')">
                 Agendamentos
             </x-responsive-nav-link>
             @if(auth()->user()->isAdmin())

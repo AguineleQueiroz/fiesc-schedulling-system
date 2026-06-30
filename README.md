@@ -73,8 +73,7 @@ app/
 │   ├── Controllers/
 │   │   ├── UserController.php
 │   │   ├── AvailabilityController.php
-│   │   ├── ScheduleController.php    # slots disponíveis (JSON) + view de criação
-│   │   └── AppointmentController.php # criação e cancelamento de agendamentos
+│   │   └── AppointmentController.php # slots, criação, cancelamento e listagem
 │   └── Requests/
 │       ├── StoreUserRequest.php
 │       ├── UpdateUserRequest.php
@@ -84,8 +83,7 @@ app/
 ├── Services/
 │   ├── UserService.php           # criação, edição, exclusão e listagem de usuários
 │   ├── AvailabilityService.php   # CRUD de disponibilidade + validação de sobreposição
-│   ├── AppointmentService.php    # criação e cancelamento de agendamentos
-│   └── ScheduleService.php       # cálculo de slots livres
+│   └── AppointmentService.php    # cálculo de slots livres, criação e cancelamento
 └── Repositories/
     └── AppointmentRepository.php # queries complexas/reutilizáveis de agendamentos
 ```
@@ -107,9 +105,19 @@ Controller  →  Service  →  Eloquent (direto)
 
 **Repository (Query Object):** encapsula apenas as queries que têm complexidade real — filtragem condicional por perfil, joins implícitos via relacionamentos, ou queries chamadas de mais de um Service. Não existe interface de Repository: a simplificação é intencional dado o escopo do projeto. Criar interfaces abstratas sem múltiplas implementações concretas seria over-engineering para uma aplicação de processo seletivo.
 
+**Mapeamento Service → agregado de domínio:**
+
+| Service | Model dono | Responsabilidade |
+|---------|-----------|-----------------|
+| `UserService` | `User` | CRUD + regra de role |
+| `AvailabilityService` | `Availability` | CRUD + validação de overlap |
+| `AppointmentService` | `Appointment` | Cálculo de slots livres, criação, cancelamento |
+
+`Schedule` não é um agregado — não existe tabela `schedules`. O conceito de "agenda" é apenas o nome que a UI dá à junção visual de `Availability` e `Appointment`. Por isso não existe `ScheduleService`: o cálculo de slots livres pertence ao `AppointmentService`, que lê `Availability` diretamente (cross-model read, sem injetar `AvailabilityService` — evita acoplamento entre services), e delega ao Repository apenas a query de agendamentos já existentes.
+
 Exemplos concretos desta divisão:
 - `AppointmentRepository::listForUser()` — filtra por role (admin vê todos, atendente vê só os seus) → Repository justificado pela regra condicional + reutilização.
-- `AppointmentRepository::scheduledForAttendantOnDate()` — usada pelo `ScheduleService` para calcular slots livres; query com critério de data e atendente → Repository justificado pela especificidade.
+- `AppointmentRepository::scheduledForAttendantOnDate()` — usada por `AppointmentService::availableSlots()` para calcular slots livres; query com critério de data e atendente → Repository justificado pela especificidade.
 - `AvailabilityService::hasOverlap()` — query Eloquent inline no Service, pois é a própria regra de negócio (validação de sobreposição); não há reutilização em outro Service.
 - `AppointmentService::create()` / `cancel()` — Eloquent direto no Service; operações triviais que não justificam Repository.
 
@@ -131,10 +139,10 @@ resources/js/
 │   ├── availability/
 │   │   ├── api.js
 │   │   └── availability.form.js  # CRUD de disponibilidade em página única
-│   └── schedule/
+│   └── appointments/
 │       ├── api.js
-│       ├── schedule.create.js    # busca de slots + criação de agendamento
-│       └── schedule.list.js      # cancelamento de agendamento com modal
+│       ├── appointments.create.js    # busca de slots + criação de agendamento
+│       └── appointments.list.js      # cancelamento de agendamento com modal
 ```
 
 **Princípio:** nenhuma Blade contém `<script>` com lógica de negócio. As views entregam apenas HTML com atributos `data-*` e um `@vite([...])` apontando para o entry point da página. Toda interação dinâmica parte dos módulos JS.
@@ -152,11 +160,11 @@ resources/js/
 | `POST` | `/availabilities` | Cadastrar disponibilidade (JSON 201) |
 | `PUT` | `/availabilities/{id}` | Editar disponibilidade (JSON 200) |
 | `DELETE` | `/availabilities/{id}` | Excluir disponibilidade (JSON 204) |
-| `GET` | `/schedule/create` | Formulário de novo agendamento (Blade) |
-| `GET` | `/schedule/slots` | Slots disponíveis para atendente + data (JSON) |
+| `GET` | `/appointments` | Listagem de agendamentos (Blade) |
+| `GET` | `/appointments/create` | Formulário de novo agendamento (Blade) |
+| `GET` | `/appointments/available-slots` | Slots disponíveis para atendente + data (JSON) |
 | `POST` | `/appointments` | Criar agendamento (JSON 201) |
 | `DELETE` | `/appointments/{id}` | Cancelar agendamento (JSON 204) |
-| `GET` | `/schedule` | Listagem de agendamentos (Blade) |
 
 Todos os endpoints retornam HTTP status codes coerentes em cenários de sucesso e erro (200, 201, 204, 400, 401, 403, 404, 422), conforme exigido pelo RQNF2.
 

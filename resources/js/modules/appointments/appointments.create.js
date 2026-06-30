@@ -1,4 +1,4 @@
-import {scheduleApi} from './api.js';
+import {appointmentApi} from './api.js';
 import {notify} from '../../core/notify.js';
 import {clearErrors, formData, showErrors} from '../../core/dom.js';
 
@@ -21,7 +21,7 @@ async function fetchSlots() {
     noSlotsMsg.classList.add('hidden');
 
     try {
-        const slots = await scheduleApi.slots(attendantId, date);
+        const slots = await appointmentApi.slots(attendantId, date);
         slotSelect.innerHTML = '<option value="">Selecione um horário...</option>';
 
         if (slots.length === 0) {
@@ -67,7 +67,7 @@ form.addEventListener('submit', async e => {
     btn.textContent = 'Agendando...';
 
     try {
-        await scheduleApi.store(data);
+        await appointmentApi.store(data);
         window.location.href = form.dataset.redirect;
     } catch (err) {
         if (err.status === 422 && Object.keys(err.errors ?? {}).length > 0) {

@@ -4,7 +4,7 @@
     </x-slot>
 
     @push('scripts')
-        @vite(['resources/js/modules/schedule/schedule.create.js'])
+        @vite(['resources/js/modules/appointments/appointments.create.js'])
     @endpush
 
     <div class="py-8">
@@ -15,7 +15,7 @@
             <div class="bg-white shadow sm:rounded-lg p-6">
                 <form id="schedule-form"
                       data-url="{{ route('appointments.store') }}"
-                      data-slots-url="{{ route('schedule.slots') }}"
+                      data-slots-url="{{ route('appointments.available-slots') }}"
                       data-redirect="{{ route('appointments.index') }}"
                       novalidate>
                     @csrf

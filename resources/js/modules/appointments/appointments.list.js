@@ -1,4 +1,4 @@
-import {scheduleApi} from './api.js';
+import {appointmentApi} from './api.js';
 import {notify} from '../../core/notify.js';
 
 const modal = document.getElementById('modal-cancel');
@@ -35,7 +35,7 @@ modalConfirm.addEventListener('click', async () => {
     modalConfirm.disabled = true;
 
     try {
-        await scheduleApi.cancel(pendingCancel.id);
+        await appointmentApi.cancel(pendingCancel.id);
         // Atualiza o status na linha sem recarregar a página
         const statusCell = pendingCancel.row.querySelector('td:nth-child(6)');
         if (statusCell) {
