@@ -184,11 +184,19 @@ O edital permite que o atendente edite o próprio usuário, mas não especifica 
 
 **Decisão:** a edição do campo `role` é bloqueada sempre que o usuário autenticado está editando a si mesmo, independentemente do seu perfil. Apenas um admin pode alterar o role de *outro* usuário. Isso é tratado em `UserService::update()` e reforçado na view `users/edit.blade.php`, que oculta o campo `role` quando o usuário edita a si mesmo.
 
-### 3. Ausência de fluxo de troca de senha
+### 3. Troca de senha fora do fluxo de edição de usuário
 
-O edital define que a edição de usuário não abrange e-mail e senha, mas não prevê onde o usuário pode alterar a própria senha. Deixar sem solução seria uma falha de usabilidade.
+O requisito 1.3 (Edição de Usuários) especifica que a tela de edição deve reaproveitar os mesmos campos da tela de inserção (1.2), exceto e-mail e senha. Essa exclusão foi interpretada como delimitada ao escopo do formulário de edição de dados cadastrais — não como uma restrição de que a senha seja imutável no sistema como um todo.
 
-**Decisão:** a tela de "Alterar Senha" do Laravel Breeze (`/profile`) foi mantida como fluxo isolado, acessível pelo dropdown do cabeçalho para qualquer usuário autenticado. Ela exige a senha atual antes de permitir a troca — sem necessidade de e-mail ou link de recuperação.
+Essa distinção é necessária porque o edital não descreve nenhum outro mecanismo de alteração de senha (como recuperação por e-mail), e a aplicação não possui um serviço de envio de e-mail configurado. Sem um fluxo alternativo, o usuário ficaria permanentemente preso à senha definida em sua criação, o que comprometeria a usabilidade do sistema — um dos critérios de avaliação explicitamente listados no edital.
+
+**Decisão:** foi implementada uma tela de autoatendimento ("Alterar Senha"), isolada do CRUD de usuários, onde o usuário logado pode alterar exclusivamente a própria senha mediante confirmação da senha atual. Essa tela:
+
+- não faz parte do formulário de edição de usuário do RQF1;
+- não permite que um administrador altere a senha de terceiros;
+- não expõe nenhum campo de senha no formulário de edição de usuário (1.3), que permanece restrito a Nome e Tipo de Usuário, conforme a leitura literal do requisito.
+
+Essa separação de responsabilidades — edição de dados cadastrais (RQF1) versus segurança da própria conta (funcionalidade complementar) — foi a forma encontrada de atender tanto à regra explícita do edital quanto à exigência implícita de usabilidade, dado que nenhum requisito determina que a senha deva permanecer imutável após a criação do usuário.
 
 ### 4. Granularidade dos slots de agendamento
 
