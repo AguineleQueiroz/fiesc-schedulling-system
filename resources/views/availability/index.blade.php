@@ -108,14 +108,14 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center space-x-3">
-                        <button type="submit"
-                                class="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
-                            Salvar
-                        </button>
+                    <div class="flex items-center justify-end space-x-3">
                         <button type="button" id="btn-cancel-form"
                                 class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200">
                             Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">
+                            Salvar
                         </button>
                     </div>
                 </form>
