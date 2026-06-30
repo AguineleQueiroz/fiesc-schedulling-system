@@ -10,11 +10,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', fn() => redirect()->route('users.index'));
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rotas que retornam View (Blade)
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Rotas que retornam View (Blade)
+     */
     Route::get('/users',              [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create',       [UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}/edit',  [UserController::class, 'edit'])->name('users.edit');
@@ -26,11 +24,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile',            [ProfileController::class, 'edit'])->name('profile.edit');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rotas que retornam JSON (API interna)
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * API interna
+     */
     Route::post('/users',                          [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}',                    [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}',                 [UserController::class, 'destroy'])->name('users.destroy');
